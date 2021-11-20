@@ -14,7 +14,7 @@ def initialize_weights(in_size,out_size,params,name=''):
     ##########################
     ##### your code here #####
     ##########################
-    np.random.seed(99)
+    # np.random.seed(0)
     b = np.zeros(out_size)
     limit = np.sqrt(6/(in_size+out_size))
 
@@ -147,4 +147,18 @@ def get_random_batches(x,y,batch_size):
     ##########################
     ##### your code here #####
     ##########################
+    examples = len(x)
+    num_batches = int(examples/batch_size)
+    a = np.arange(examples)
+    indices = np.zeros((num_batches, batch_size))
+    for i in range(num_batches):
+        indices[i,:] = np.random.choice(a, batch_size, replace=False)
+        x_batch = np.zeros((batch_size, x.shape[1]))
+        y_batch = np.zeros((batch_size, y.shape[1]))
+        for j in range(batch_size):
+            x_batch[j,:] = x[int(indices[i,j]),:]
+            y_batch[j,:] = y[int(indices[i,j]),:]
+            a = a[a != indices[i,j]]
+        batches.append((x_batch, y_batch))
+
     return batches

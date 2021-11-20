@@ -77,37 +77,53 @@ for k,v in sorted(list(params.items())):
         name = k.split('_')[1]
         print(name, v.shape, params[name].shape)
 
-# # Q 2.4
-# batches = get_random_batches(x,y,5)
-# # print batch sizes
-# print([_[0].shape[0] for _ in batches])
-# batch_num = len(batches)
+# Q 2.4
+batches = get_random_batches(x,y,5)
+# print batch sizes
+print([_[0].shape[0] for _ in batches])
+batch_num = len(batches)
 
-# # WRITE A TRAINING LOOP HERE
-# max_iters = 500
-# learning_rate = 1e-3
-# # with default settings, you should get loss < 35 and accuracy > 75%
-# for itr in range(max_iters):
-#     total_loss = 0
-#     avg_acc = 0
-#     for xb,yb in batches:
-#         pass
-#         # forward
+# WRITE A TRAINING LOOP HERE
+max_iters = 500
+learning_rate = 1e-3
+num_epochs = 5
+# with default settings, you should get loss < 35 and accuracy > 75%
+for epoch in range(num_epochs):
+    
+    for itr in range(max_iters):
+        total_loss = 0
+        avg_acc = 0
+        for xb,yb in batches:
+            
+            # forward
+            h1 = forward(xb, params, 'layer1')
+            probsb = forward(h1,params,'output',softmax)
+            # loss
+            loss, acc = compute_loss_and_acc(yb, probsb)
+            # be sure to add loss and accuracy to epoch totals 
+            total_loss += loss
+            avg_acc += acc
+            avg_acc = avg_acc/2 
+            # backward
+            delta1b = probsb
+            yb_idx = np.argmax(yb, axis=1)
+            delta1b[np.arange(probsb.shape[0]),yb_idx] -= 1
+            
+            delta2b = backwards(delta1b,params,'output',linear_deriv)
+            backwards(delta2b,params,'layer1',sigmoid_deriv)
+            # apply gradient
 
-#         # loss
-#         # be sure to add loss and accuracy to epoch totals 
-
-#         # backward
-
-#         # apply gradient
-
-#         ##########################
-#         ##### your code here #####
-#         ##########################
-
+            ##########################
+            ##### your code here #####
+            ##########################
+            params['Wlayer1'] = params['Wlayer1'] - learning_rate*params['grad_Wlayer1']
+            params['blayer1'] = params['blayer1'] - learning_rate*params['grad_blayer1']
+            params['Woutput'] = params['Woutput'] - learning_rate*params['grad_Woutput']
+            params['boutput'] = params['boutput'] - learning_rate*params['grad_boutput']
+            
+        if itr % 100 == 0:
+            print("itr: {:02d} \t loss: {:.2f} \t acc : {:.2f}".format(itr,total_loss,avg_acc))
         
-#     if itr % 100 == 0:
-#         print("itr: {:02d} \t loss: {:.2f} \t acc : {:.2f}".format(itr,total_loss,avg_acc))
 
 
 # # Q 2.5 should be implemented in this file
@@ -123,7 +139,10 @@ for k,v in sorted(list(params.items())):
 
 # eps = 1e-6
 # for k,v in params.items():
-#     if '_' in k: 
+#     # print(k)
+#     # print(v)
+#     if 'W' in k: 
+#         print("in",k)
 #         continue
 #     # we have a real parameter!
 #     # for each value inside the parameter
