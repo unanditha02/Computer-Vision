@@ -1,5 +1,6 @@
 import numpy as np
 from util import *
+# from sklearn.metrics import log_loss
 # do not include any more libraries here!
 # do not put any code outside of functions!
 
@@ -14,7 +15,7 @@ def initialize_weights(in_size,out_size,params,name=''):
     ##########################
     ##### your code here #####
     ##########################
-    # np.random.seed(0)
+    np.random.seed(1)
     b = np.zeros(out_size)
     limit = np.sqrt(6/(in_size+out_size))
 
@@ -96,6 +97,7 @@ def compute_loss_and_acc(y, probs):
     trueValues = 0
     totalValues = len(y)
     loss = -np.sum(np.multiply(y, np.log(probs)))
+    loss = loss / totalValues
     for i in range(totalValues):
         if np.argmax(probs[i,:]) == np.argmax(y[i,:]):
             trueValues += 1

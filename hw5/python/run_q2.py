@@ -88,9 +88,9 @@ max_iters = 500
 learning_rate = 1e-3
 num_epochs = 5
 # with default settings, you should get loss < 35 and accuracy > 75%
-for epoch in range(num_epochs):
+# for epoch in range(num_epochs):
     
-    for itr in range(max_iters):
+for itr in range(max_iters):
         total_loss = 0
         avg_acc = 0
         for xb,yb in batches:
