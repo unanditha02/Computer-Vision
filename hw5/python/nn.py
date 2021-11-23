@@ -54,9 +54,9 @@ def forward(X,params,name='',activation=sigmoid):
     ##########################
     ##### your code here #####
     ##########################
-    examples, data = X.shape
-    _, units = W.shape
-    pre_act = np.zeros(shape=(examples, units))
+    # examples, data = X.shape
+    # _, units = W.shape
+    # pre_act = np.zeros(shape=(examples, units))
     pre_act = X @ W + b
     post_act = activation(pre_act)
 
