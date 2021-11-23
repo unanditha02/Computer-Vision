@@ -21,6 +21,7 @@ lr_rate = 20
 batches = get_random_batches(train_x,np.ones((train_x.shape[0],1)),batch_size)
 batch_num = len(batches)
 input_layer = 1024
+output_layer = 1024
 params = Counter()
 
 # Q5.1 & Q5.2
@@ -31,15 +32,15 @@ params = Counter()
 initialize_weights(input_layer, hidden_size, params, 'layer1')
 initialize_weights(hidden_size, hidden_size, params, 'layer2')
 initialize_weights(hidden_size, hidden_size, params, 'layer3')
-initialize_weights(hidden_size, input_layer, params, 'output')
+initialize_weights(hidden_size, output_layer, params, 'output')
 params['m_Wlayer1'] = np.zeros(shape=(input_layer, hidden_size))
 params['m_Wlayer2'] = np.zeros(shape=(hidden_size, hidden_size))
 params['m_Wlayer3'] = np.zeros(shape=(hidden_size, hidden_size))
-params['m_Woutput'] = np.zeros(shape=(hidden_size, input_layer))
+params['m_Woutput'] = np.zeros(shape=(hidden_size, output_layer))
 params['m_blayer1'] = np.zeros(shape=(hidden_size))
 params['m_blayer2'] = np.zeros(shape=(hidden_size))
 params['m_blayer3'] = np.zeros(shape=(hidden_size))
-params['m_boutput'] = np.zeros(shape=(input_layer))
+params['m_boutput'] = np.zeros(shape=(output_layer))
 train_loss = np.zeros(max_iters)
 valid_loss = np.zeros(max_iters)
 # should look like your previous training loops
@@ -123,14 +124,47 @@ with open('q5_weights.pickle', 'wb') as handle:
     pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # Q5.3.1
-
 # visualize some results
-##########################
-##### your code here #####
-##########################
+#########################
+#### your code here #####
+#########################
+with open('q5_weights.pickle', 'rb') as handle:
+    params = pickle.load(handle)
+index = [0, 10, 100, 130, 500, 560, 1000, 1002, 2000, 2002]
+# index = (0, 3600, 100)
+for i in index:
+    image = valid_x[i]
+    h1 = forward(image, params, 'layer1',relu)
+    h2 = forward(h1,params,'layer2',relu)
+    h3 = forward(h2, params, 'layer3',relu)
+    image_recon = forward(h3,params,'output',sigmoid)
+
+    fig = plt.figure(figsize=(10, 7))
+    fig.add_subplot(1, 2, 1)
+    plt.imshow(image.reshape(32,32).T, cmap='gray')
+    plt.axis('off')
+    plt.title("Image")
+    fig.add_subplot(1, 2, 2)
+    plt.imshow(image_recon.reshape(32,32).T, cmap='gray')
+    plt.axis('off')
+    plt.title("Image Reconstructed")
+    plt.show()
 
 # Q5.3.2
 # evaluate PSNR
 ##########################
 ##### your code here #####
 ##########################
+with open('q5_weights.pickle', 'rb') as handle:
+    params = pickle.load(handle)
+psnr = 0
+for i in range(len(valid_x)):
+    image = valid_x[i]
+    h1 = forward(image, params, 'layer1',relu)
+    h2 = forward(h1,params,'layer2',relu)
+    h3 = forward(h2, params, 'layer3',relu)
+    image_recon = forward(h3,params,'output',sigmoid)
+
+    psnr += peak_signal_noise_ratio(image, image_recon)
+
+print(psnr/len(valid_x))
