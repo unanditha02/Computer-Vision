@@ -39,16 +39,5 @@ def findLetters(image):
         if region.area >= 100:
             bboxes.append(region.bbox)
   
-    #     # take regions with large enough areas
-    #     if region.area >= 100:
-    #         # draw rectangle around segmented coins
-    #         minr, minc, maxr, maxc = region.bbox
-    #         rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
-    #                                 fill=False, edgecolor='red', linewidth=2)
-    #         ax.add_patch(rect)
-
-    # ax.set_axis_off()
-    # plt.tight_layout()
-    # plt.show()
     bw = (~bw).astype(np.float)
     return bboxes, bw
