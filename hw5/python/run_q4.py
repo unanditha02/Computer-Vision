@@ -50,17 +50,17 @@ for img in os.listdir('../images'):
     centers = [((bbox[2]+bbox[0])//2, (bbox[3]+bbox[1])//2, bbox[2]-bbox[0], bbox[3]-bbox[1]) for bbox in bboxes]
     centers = sorted(centers, key=lambda p: p[0])
     rows = []
-    pre_h = centers[0][0]
+    pre = centers[0][0]
         # cluster rows
     row = []
-    for c in centers:
-        if c[0] > pre_h + mean_height:
+    for center in centers:
+        if center[0] > pre + mean_height:
                 row = sorted(row, key=lambda p: p[1])
                 rows.append(row)
-                row = [c]
-                pre_h = c[0]
+                row = [center]
+                pre = center[0]
         else:
-                row.append(c)
+                row.append(center)
     row = sorted(row, key=lambda p: p[1])
     rows.append(row)
 
@@ -69,10 +69,8 @@ for img in os.listdir('../images'):
         row_data = []
         bbox_row = np.array(row)
         for bbox in bbox_row:
-            # crop out the character
             y, x, h, w = bbox
             crop = bw[y-h//2:y+h//2, x-w//2:x+w//2]
-                # pad it to square
             h_pad, w_pad = 0, 0
             if h > w:
                     h_pad = h//20

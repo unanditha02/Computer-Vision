@@ -104,8 +104,8 @@ for itr in range(max_iters):
         
     # loss
     vloss = np.sum((probs - valid_x)**2)
-    train_loss[itr] = total_loss/len(train_x)
-    valid_loss[itr] = vloss/len(valid_x)
+    train_loss[itr] = total_loss/(train_x.shape[0])
+    valid_loss[itr] = vloss/(valid_x.shape[0])
     
     if itr % 2 == 0:
         print("Epoch: {:2d} \t Training: \t loss: {:.2f} \t ".format(itr, train_loss[itr]),"\t Validation: \t loss: {:.2f}".format(valid_loss[itr]))
@@ -130,8 +130,8 @@ with open('q5_weights.pickle', 'wb') as handle:
 #########################
 with open('q5_weights.pickle', 'rb') as handle:
     params = pickle.load(handle)
-index = [0, 10, 100, 130, 500, 560, 1000, 1002, 2000, 2002]
-# index = (0, 3600, 100)
+index = [2, 20, 100, 130, 500, 560, 1000, 1002, 2000, 2045]
+
 for i in index:
     image = valid_x[i]
     h1 = forward(image, params, 'layer1',relu)

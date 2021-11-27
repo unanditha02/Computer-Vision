@@ -126,42 +126,42 @@ for itr in range(max_iters):
         
 
 
-# # Q 2.5 should be implemented in this file
-# # you can do this before or after training the network. 
+# Q 2.5 should be implemented in this file
+# you can do this before or after training the network. 
 
-# ##########################
-# ##### your code here #####
-# ##########################
+##########################
+##### your code here #####
+##########################
 
-# # save the old params
-# import copy
-# params_orig = copy.deepcopy(params)
+# save the old params
+import copy
+params_orig = copy.deepcopy(params)
 
-# eps = 1e-6
-# for k,v in params.items():
-#     # print(k)
-#     # print(v)
-#     if 'W' in k: 
-#         print("in",k)
-#         continue
-#     # we have a real parameter!
-#     # for each value inside the parameter
-#     #   add epsilon
-#     #   run the network
-#     #   get the loss
-#     #   compute derivative with central diffs
+eps = 1e-6
+for k,v in params.items():
+    # print(k)
+    # print(v)
+    if 'W' in k: 
+        print("in",k)
+        continue
+    # we have a real parameter!
+    # for each value inside the parameter
+    #   add epsilon
+    #   run the network
+    #   get the loss
+    #   compute derivative with central diffs
     
-#     ##########################
-#     ##### your code here #####
-#     ##########################
+    ##########################
+    ##### your code here #####
+    ##########################
 
-# total_error = 0
-# for k in params.keys():
-#     if 'grad_' in k:
-#         # relative error
-#         err = np.abs(params[k] - params_orig[k])/np.maximum(np.abs(params[k]),np.abs(params_orig[k]))
-#         err = err.sum()
-#         print('{} {:.2e}'.format(k, err))
-#         total_error += err
-# # should be less than 1e-4
-# print('total {:.2e}'.format(total_error))
+total_error = 0
+for k in params.keys():
+    if 'grad_' in k:
+        # relative error
+        err = np.abs(params[k] - params_orig[k])/np.maximum(np.abs(params[k]),np.abs(params_orig[k]))
+        err = err.sum()
+        print('{} {:.2e}'.format(k, err))
+        total_error += err
+# should be less than 1e-4
+print('total {:.2e}'.format(total_error))

@@ -17,10 +17,10 @@ test_x, test_y = test_data['test_data'], test_data['test_labels']
 
 print(train_x.shape)
 print(valid_x.shape)
-max_iters = 50
+max_iters = 100
 # pick a batch size, learning rate
 batch_size = 32
-learning_rate = 1e-3
+learning_rate = 3e-3
 hidden_size = 64
 classes = 36
 input_layer = 1024
@@ -30,7 +30,7 @@ input_layer = 1024
 
 batches = get_random_batches(train_x,train_y,batch_size)
 batch_num = len(batches)
-num_epochs = 40
+
 params = {}
 
 # initialize layers here
@@ -48,9 +48,7 @@ valid_loss = np.zeros(max_iters)
 for itr in range(max_iters):
         total_loss = 0
         total_acc = 0
-        # input_args = [(epoch, itr, xb, yb, total_loss, total_acc, params) for xb,yb in batches] 
-        # result = pool.starmap(trainBatch, input_args)
-        # print(result.shape)
+        
         for xb,yb in batches:
             
             # training loop can be exactly the same as q2!
@@ -74,8 +72,7 @@ for itr in range(max_iters):
             
             delta2b = backwards(delta1b,params,'output',linear_deriv)
             backwards(delta2b,params,'layer1',sigmoid_deriv)
-            # apply gradient
-
+            
             ##########################
             ##### your code here #####
             ##########################
@@ -88,12 +85,12 @@ for itr in range(max_iters):
         probs = forward(h1,params,'output',softmax)
         # loss
         vloss, vacc = compute_loss_and_acc(valid_y, probs)
-        train_loss[itr] = total_loss
+        train_loss[itr] = total_loss/(train_x.shape[0])
         train_acc[itr] = total_acc
-        valid_loss[itr] = vloss
+        valid_loss[itr] = vloss/(valid_x.shape[0])
         valid_acc[itr] = vacc
         if itr % 2 == 0:
-                print("Epoch: {:2d} \t Training: \t loss: {:.2f} \t acc : {:.2f}".format(itr, total_loss, total_acc),"\t Validation: \t loss: {:.2f} \t acc : {:.2f}".format(vloss, vacc))        
+                print("Epoch: {:2d} \t Training: \t loss: {:.2f} \t acc : {:.2f}".format(itr, train_loss[itr], train_acc[itr]),"\t Validation: \t loss: {:.2f} \t acc : {:.2f}".format(valid_loss[itr], valid_acc[itr]))        
         
 
 n = range(max_iters)
@@ -112,37 +109,19 @@ plt.ylabel('Accuracy')
 plt.legend()
 plt.show()
 
-np.save('loss_acc.npz', trainloss=train_loss, trainacc=train_acc, validloss=valid_loss, validacc=valid_acc)
-
-with open('weights.pickle', 'wb') as handle:
-    pickle.dump(params, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-with open('filename.pickle', 'rb') as handle:
-    weights = pickle.load(handle)
-
 saved_params = {k:v for k,v in params.items() if '_' not in k}
 with open('q3_weights.pickle', 'wb') as handle:
     pickle.dump(saved_params, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-################################################################################
+##############################################################################
 
 
-# # run on validation set and report accuracy! should be above 75%
+# run on validation set and report accuracy! should be above 75%
 
-# # ##########################
-# # ##### your code here #####
-# # ##########################
-# # forward
-# h1 = forward(valid_x, params, 'layer1')
-# probs = forward(h1,params,'output',softmax)
-# # loss
-# loss, acc = compute_loss_and_acc(valid_y, probs)
-# be sure to add loss and accuracy to epoch totals 
-# valid_loss += loss
-# valid_acc += acc
-# valid_acc = total_acc/2 
+#########################
+#### your code here #####
+#########################
 
-# print('Validation accuracy: ',valid_acc)
 # if False: # view the data
 #     for crop in xb:
 #         import matplotlib.pyplot as plt
@@ -168,8 +147,6 @@ initialize_weights(hidden_size, classes, params_init, 'output')
 with open('q3_weights.pickle', 'rb') as handle:
     saved_params = pickle.load(handle)
 
-# initW = params['Wlayer1'].reshape((64,32,32))
-# trainedW = saved_params['Wlayer1'].reshape((64,32,32))
 initW = params_init['Wlayer1'].reshape((32,32,64))
 trainedW = saved_params['Wlayer1'].reshape((32,32,64))
 initW_arr = []
@@ -177,18 +154,6 @@ trainedW_arr = []
 for i in range(initW.shape[2]):
     initW_arr.append(initW[:,:,i])
     trainedW_arr.append(trainedW[:,:,i])
-# for i in range(initW.shape[0]):
-    # initW_arr.append(initW[i,:,:])
-    # trainedW_arr.append(trainedW[i,:,:])
-
-# initW = params['Woutput'].reshape((6,6,64))
-# trainedW = saved_params['Woutput'].reshape((6,6,64))
-# initW_arr = []
-# trainedW_arr = []
-# for i in range(initW.shape[2]):
-#     initW_arr.append(initW[:,:,i])
-#     trainedW_arr.append(trainedW[:,:,i])
-
 
 fig = plt.figure("Initialized Weights", figsize=(20., 20.))
 grid = ImageGrid(fig, 111,

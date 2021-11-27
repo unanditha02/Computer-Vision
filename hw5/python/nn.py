@@ -54,9 +54,6 @@ def forward(X,params,name='',activation=sigmoid):
     ##########################
     ##### your code here #####
     ##########################
-    # examples, data = X.shape
-    # _, units = W.shape
-    # pre_act = np.zeros(shape=(examples, units))
     pre_act = X @ W + b
     post_act = activation(pre_act)
 
@@ -97,7 +94,6 @@ def compute_loss_and_acc(y, probs):
     trueValues = 0
     totalValues = len(y)
     loss = -np.sum(np.multiply(y, np.log(probs)))
-    loss = loss / totalValues
     for i in range(totalValues):
         if np.argmax(probs[i,:]) == np.argmax(y[i,:]):
             trueValues += 1
