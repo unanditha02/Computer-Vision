@@ -8,6 +8,11 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from utils import integrateFrankot
+from skimage.color import rgb2xyz
+from skimage.io import imread
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import math
 
 def renderNDotLSphere(center, rad, light, pxSize, res):
 
@@ -41,8 +46,25 @@ def renderNDotLSphere(center, rad, light, pxSize, res):
     image : numpy.ndarray
         The rendered image of the hemispherical bowl
     """
+    nx, ny = res
+    image = np.zeros((ny, nx))
+    x = np.arange(int(-nx/2), int(nx/2), 1)
+    y = np.arange(int(-ny/2), int(ny/2), 1)
+    xx, yy = np.meshgrid(x,y)
+    xx = xx*pxSize
+    yy = yy*pxSize
+    isit = (xx**2 + yy**2) <= rad**2
 
-    image = None
+    zz = np.sqrt(rad**2 - xx**2 - yy**2)
+    zz[~isit] = 0
+    sphere  = np.dstack((xx, yy, zz))
+    
+    
+    image = np.dot(sphere,light)
+    
+    image = np.where(image < 0, 0, image)
+    image[~isit] = 0
+
     return image
 
 
@@ -72,10 +94,22 @@ def loadData(path = "../data/"):
         Image shape
 
     """
+    # Extracting image shape s
+    image = plt.imread(path+'input_1.tif')
+    image = np.array(image, dtype='uint16')
+    s = (image.shape[0],image.shape[1])
+    I = np.zeros((7,s[0]*s[1]))
 
-    I = None
-    L = None
-    s = None
+    # Reading images, converting to XYZ format, extracting luminance and flattening
+    for i in range(7):
+        filepath = path+'input_'+str(i+1)+'.tif'
+        image =  imread(filepath)
+        img_xyz = rgb2xyz(image)
+        I[i,:] = img_xyz[:,:,1].flatten()
+
+    # Reading the lighting directions data 
+    sources = np.load(path+'sources.npy')
+    L = sources.T
 
     return I, L, s
 
@@ -102,7 +136,7 @@ def estimatePseudonormalsCalibrated(I, L):
         The 3 x P matrix of pesudonormals
     """
 
-    B = None
+    B = np.linalg.inv(L @ L.T) @ L @ I
     return B
 
 
@@ -127,8 +161,8 @@ def estimateAlbedosNormals(B):
         The 3 x P matrix of normals
     '''
 
-    albedos = None
-    normals = None
+    albedos = np.linalg.norm(B, axis=0)
+    normals = np.divide(B, albedos)
     return albedos, normals
 
 
@@ -163,8 +197,9 @@ def displayAlbedosNormals(albedos, normals, s):
 
     """
 
-    albedoIm = None
-    normalIm = None
+    albedoIm = albedos.reshape((s))
+    x,y = s
+    normalIm = normals.T.reshape((x,y,3))
 
     return albedoIm, normalIm
 
@@ -191,8 +226,10 @@ def estimateShape(normals, s):
         The image, of size s, of estimated depths at each point
 
     """
-
-    surface = None
+    zx = (-normals[0,:]/normals[2,:]).reshape((s))
+    zy = (-normals[1,:]/normals[2,:]).reshape((s))
+    
+    surface = integrateFrankot(zx, zy)
     return surface
 
 
@@ -213,11 +250,52 @@ def plotSurface(surface):
         None
 
     """
+    x, y = surface.shape
 
-    pass
+    X, Y = np.meshgrid(np.arange(0, y, 1), np.arange(0, x, 1))
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    ax.plot_surface(X, Y, -surface, cmap='coolwarm')
+    plt.show()
 
 
 if __name__ == '__main__':
-
+    
     # Put your main code here
-    pass
+
+    center = [0, 0, 0]
+    rad = 75e-4
+    pxSize = 7e-6
+    light = np.divide([[1, 1, 1],[1, -1, 1],[-1, -1, 1]], math.sqrt(3))
+    res = (3840, 2160)
+    for i in range(3):
+        image = renderNDotLSphere(center, rad, light[i], pxSize, res)
+        plt.imshow(image, cmap='gray')
+        plt.axis('off')
+        plt.show()
+
+    
+    I, L, s = loadData()
+    print('Shapes for I, L, s: ', I.shape, L.shape, s)
+
+    U, S, Vh = np.linalg.svd(I, full_matrices=False)
+    print(np.linalg.matrix_rank(I))
+    # print(u)
+    print('Singular Values: ', S)
+    # print(vh)
+
+    B = estimatePseudonormalsCalibrated(I, L)
+    print('B: ', B)
+
+    albedos, normals = estimateAlbedosNormals(B)
+    albedoIm, normalIm = displayAlbedosNormals(albedos, normals, s)
+
+    plt.imshow(albedoIm, cmap='gray')
+    plt.axis('off')
+    plt.show()
+    plt.imshow(normalIm, cmap='rainbow')
+    plt.axis('off')
+    plt.show()
+
+    surface = estimateShape(normals, s)
+    plotSurface(surface)
